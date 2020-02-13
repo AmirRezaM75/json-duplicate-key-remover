@@ -15,11 +15,11 @@
 		return;
 	}
 
-	fwrite($stdout, "Where should I store your final output? \n");
+	fwrite($stdout, "Where should I store your final output? (default: output)\n");
 
 	fwrite($stdout, "> ");
 
-	$outputDirectory = trim(fgets($stdin));
+	$outputDirectory = strlen(trim(fgets($stdin))) > 0 ? trim(fgets($stdin)) : 'output';
 	
 	$files = array_map(function($file) use ($inputDirectory) {
 		return str_replace("$inputDirectory/", '', $file);
@@ -29,26 +29,13 @@
 
 		$array = json_decode(file_get_contents("$inputDirectory/$file"), TRUE);
 
-		// json_decode will overwrite duplicate keys (we don't need code below)
-		
-		/*
-		$temp = [];
-
-		foreach ($array as $key => $value) {
-			var_dump($key);
-			if (! array_key_exists($key, $temp)) {
-				$temp[$key] = $value;
-			}
-		}
-		*/
-
-		// It only works for indexed arrays (not multi dimentional arrays)
+		// It only works for indexed arrays
 		// $array = array_unique($array, SORT_REGULAR);
 
 		$result = json_encode($array, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
 		if (! is_dir($outputDirectory))
-			mkdir('output');
+			mkdir($outputDirectory);
 
-		file_put_contents("output/$file", $result);
+		file_put_contents("$outputDirectory/$file", $result);
 	}
